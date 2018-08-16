@@ -30,14 +30,9 @@ app.get('/api/courses', (request, response) => {
 });
 
 app.post('/api/courses', ( request, response ) => {
-    const schema = {
-        name: Joi.string().min(3).required()
-    };
-
-    const  result = Joi.validate( request.body, schema);
-    if( result.error ) {
-        response.status(400).send(result.error.details[0].message);
-        return;
+    const { error } = validateInput(request.body);
+    if( error ) {
+        return response.status(400).send(result.error.details[0].message);
     }
     const course = {
         id: data.length + 1,
@@ -47,12 +42,44 @@ app.post('/api/courses', ( request, response ) => {
     response.send(data);
 });
 
+app.put('/api/courses/:id', ( request, response ) => {
+
+    const course = data.find( c => c.id === parseInt( request.params.id ));
+    if( !course ) {
+        return response.status(400).send("Course id is not valid");
+    }
+    const { error } = validateInput(request.body);
+    if( error ) {
+        response.status(400).send(result.error.details[0].message);
+        return;
+    }
+    course.name = request.body.name;
+    response.send(course);
+});
+
+app.delete('/api/courses/:id', ( request, response ) => {
+    const course = data.find( c => c.id === parseInt( request.params.id ));
+    if( !course ) {
+        return response.status(400).send("Course id is not valid");
+    }
+    const index = courses.indexOf(course);
+    courses.splice(index, 1);
+    response.send(course);
+});
+
+function validateInput(course) {
+    const schema = {
+        name: Joi.string().min(3).required()
+    };
+    return Joi.validate( course, schema); 
+}
+
 app.get('/api/courses/:id', (request, response) => {
     const course = data.find( c => c.id === parseInt( request.params.id ));
     if( !course ) {
-        response.status(404).send("The course id is not valid");
+        return response.status(404).send("The course id is not valid");
     } else {
-        response.send( course );
+        return response.send( course );
     }
 });
 
