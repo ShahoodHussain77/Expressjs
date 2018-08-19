@@ -1,10 +1,23 @@
 const express = require("express");
-
+const Joi = require('joi');
+const logger = require('./logger');
 const app = express();
 
-const Joi = require('joi');
+app.set('view engine', 'pug');
+
+app.set('views', './views');
 
 app.use(express.json());
+
+app.use(express.urlencoded({ extended: true }));
+
+app.use(express.static('public'));
+
+app.use(logger);
+
+if( app.get('env') === 'development' ) {
+    console.log('Development environment');
+}
 
 var data = [
     {
@@ -22,7 +35,7 @@ var data = [
 ]
 
 app.get('/', (request, response) => {
-    response.send('Hitting root api');
+    response.render('index', { title: 'Express app ', message: 'Hey there' });
 });
 
 app.get('/api/courses', (request, response) => {
